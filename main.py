@@ -3,7 +3,11 @@ from telethon import TelegramClient, events
 api_id = 31891006  # <-- apna api_id daal
 api_hash = '79068ae528aa4242c45006cb68c89a07' # <-- apna api_hash daal
 
-client = TelegramClient('session', api_id, api_hash)
+import os
+
+session_name = os.getenv("SESSION_NAME", "session")
+
+client = TelegramClient(session_name, api_id, api_hash)
 
 source_group = '@theprofessionals'
 target_group = '@kushjobs123'
