@@ -1,11 +1,20 @@
 from telethon import TelegramClient, events
+from telethon.errors import AuthKeyDuplicatedError
+
+import os
+import sys
 
 api_id = 31891006  # <-- apna api_id daal
 api_hash = '79068ae528aa4242c45006cb68c89a07' # <-- apna api_hash daal
 
-import os
-
 session_name = os.getenv("SESSION_NAME", "session")
+session_file = f"{session_name}.session"
+
+# Delete a corrupted/duplicate session before starting if requested
+if os.getenv("FORCE_NEW_SESSION", "").lower() in ("1", "true", "yes"):
+    if os.path.exists(session_file):
+        os.remove(session_file)
+        print(f"⚠️  FORCE_NEW_SESSION: deleted '{session_file}'. Starting fresh.")
 
 client = TelegramClient(session_name, api_id, api_hash)
 
@@ -43,6 +52,17 @@ async def edit_handler(event):
         print("Edit error:", e)
 
 
-client.start()
+try:
+    client.start()
+except AuthKeyDuplicatedError:
+    print(
+        "❌ AuthKeyDuplicatedError: the session file is corrupted or was used "
+        "from multiple IPs simultaneously. Deleting the session file now.\n"
+        "➡️  Restart the app to create a fresh session."
+    )
+    if os.path.exists(session_file):
+        os.remove(session_file)
+    sys.exit(1)
+
 print("🔥 Bot chal raha hai...")
 client.run_until_disconnected()
