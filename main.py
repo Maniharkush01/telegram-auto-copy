@@ -52,8 +52,21 @@ async def edit_handler(event):
         print("Edit error:", e)
 
 
+phone = os.getenv("TELEGRAM_PHONE")
+bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
+
+if not phone and not bot_token:
+    print(
+        "❌ Missing credentials: set either TELEGRAM_PHONE (for a user account) "
+        "or TELEGRAM_BOT_TOKEN (for a bot) as an environment variable."
+    )
+    sys.exit(1)
+
 try:
-    client.start()
+    if bot_token:
+        client.start(bot_token=bot_token)
+    else:
+        client.start(phone=phone)
 except AuthKeyDuplicatedError:
     print(
         "❌ AuthKeyDuplicatedError: the session file is corrupted or was used "
